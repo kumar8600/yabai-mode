@@ -13,6 +13,7 @@ This mode can works with below.
 Build systems (**This is requirements**):
 
   - [cmake][] (with (UNIX/MinGW/MSYS) Makefile generator)
+  - make
 
 Syntax check packages:
 
@@ -25,7 +26,7 @@ Completion (like Intellisense) packages:
     - >= 0.5
   - [emacs-clang-complete-async][]
 
-Installation
+Set up
 ------------
 
 Basic setup:
@@ -48,11 +49,11 @@ Usage
 2. Create build-tree named `build`. (If you don't do it, this package asks you where is build-tree.)
 3. Just open your source code.
 
+#### Advanced
+
 (If valid `CMakeLists.txt` is exists at upper or current directory, it will work.
 If you don't have build tree, this plugin ask you where build tree create. Build tree's name
 must `build`. If you want to change this name, customize variable `cccc/cmake-build-tree-name`.)
-
-#### Advanced
 
 Compile option analysis can be controlled with `cccc/load-options` and
 `cccc/reload-options`. But you probably don't need call them directly. While cccc-mode
