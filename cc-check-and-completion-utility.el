@@ -2,7 +2,7 @@
 
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/cc-check-and-completion-utility
-;; Version: 0.01
+;; Version: 0.10
 ;; Package-Requires: ((cl-lib) (json))
 
 ;; Copyright (c) 2014 by kumar8600
@@ -469,7 +469,7 @@ WORKING-DIR is used to solve relative path."
 (defun cccc/cmake-parse-options (compile-commands-json-path)
   "Guess compile options from COMPILE-COMMANDS-JSON-PATH.
 
-Return array is parsed from JSON."
+Return a array is parsed from JSON."
     (json-read-file compile-commands-json-path))
 
 (defun cccc/cmake-find-compile-info (src-file-path info-alists)
@@ -481,8 +481,6 @@ Return array is parsed from JSON."
 		      item
 		    nil)))
 	      info-alists))
-
-
 
 ;;;; Interface
 (defun cccc/cmake-guess-options (build-tree-path src-file-path)

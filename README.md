@@ -1,28 +1,33 @@
 cc-check-and-completion-utility
 ========================
 
-Emacs minor mode for auto configuration of C/C++ syntax checking and completion packages with [cmake][].
+Emacs minor mode for auto configuration of C/C++ syntax checking and completion packages with [CMake][].
 
-This mode get the compile options from build system [cmake][] and
+This mode get the compile options from build system [CMake][] and
 configure syntax checking and completion packages. Not only that, you can
 generate build tree and compile and run it. So, you can use emacs like IDE
 by only put source codes and build configuration file `CMakeFile.txt`.
 
-This mode can works with below.
+This mode can works with...
+---------------------------------
 
-Build systems (**This is requirements**):
+#### Build systems (**Choose at least any one.**):
 
-  - [cmake][] (with (UNIX/MinGW/MSYS) Makefile generator)
-  - make
+  - [CMake][]
+    - with [Make][GNU Make] (default)
+	- with [Ninja][]
+  - Under constructions...
+    - [Bear][]
+    - [JSON Compilation Database Format][clang-json]
 
-Syntax check packages:
+#### Syntax check packages:
 
-  - [flycheck][]
+  - [Flycheck][]
     - >= 0.16
 
-Completion (like Intellisense) packages:
+#### Completion (like Intellisense) packages:
 
-  - [company][]
+  - [Company][]
     - >= 0.5
   - [emacs-clang-complete-async][]
 
@@ -43,17 +48,13 @@ Basic setup:
 Usage
 -----
 
-#### Basic
+#### Basic (with CMake)
 
 1. Put source codes and `CMakeLists.txt` on your source tree.
 2. Create build-tree named `build`. (If you don't do it, this package asks you where is build-tree.)
-3. Just open your source code.
+3. Just open your source code. Enjoy!
 
 #### Advanced
-
-(If valid `CMakeLists.txt` is exists at upper or current directory, it will work.
-If you don't have build tree, this plugin ask you where build tree create. Build tree's name
-must `build`. If you want to change this name, customize variable `cccc/cmake-build-tree-name`.)
 
 Compile option analysis can be controlled with `cccc/load-options` and
 `cccc/reload-options`. But you probably don't need call them directly. While cccc-mode
@@ -66,7 +67,13 @@ You can run executable file with `cccc/run`.
 
 If you want to compile and run, I recommend `cccc/compile-and-run`.
 
-##### Acceptable trees
+##### CMake
+
+If valid `CMakeLists.txt` is exists at source code's directory or upper, it will work.
+If you don't have build tree, this plugin ask you where build tree create. Build tree's name must
+be `build`. If you want to change this name, customize variable `cccc/cmake-build-tree-name`.
+
+###### Acceptable trees
 
 If `CMakeFiles.txt` and build-tree `build` are exists at upper or current directory where source is opened exists,
 it is acceptable tree.
@@ -107,12 +114,18 @@ There are customizable user options.
   - CMake's build tree name used when build-tree searching and creating.
   - Default value is `"build"`.
 
+- `cccc/cmake-generator`
+  - CMake's build system generator.
+  - You can select `cmakefiles` or `ninja`.
+    - When select `cmakefiles` in windows, automatically detect environment
+	  and select `MinGW Makefiles` or `MSYS Makefiles` generators.
+
 - `cccc/with-checker-flycheck`
-  - Set non-nil if you want to use [flycheck][] as checker.
+  - Set non-nil if you want to use [Flycheck][] as checker.
   - Default value is `t`.
 
 - `cccc/with-completer-company`
-  - Set non-nil if you want to use [company][] as checker.
+  - Set non-nil if you want to use [Company][] as checker.
   - Default value is `t`.
 
 - `cccc/with-completer-ac-clang-async`
@@ -132,10 +145,14 @@ Similar packages
 - [irony-mode][]
 - [rtags][]
 
-[flycheck]: https://github.com/flycheck/flycheck
-[company]: http://company-mode.github.io/
-[cmake]: http://www.cmake.org/
-[clang]: http://clang.llvm.org/
+[Flycheck]: https://github.com/flycheck/flycheck
+[Company]: http://company-mode.github.io/
+[CMake]: http://www.cmake.org/
+[GNU Make]: http://www.gnu.org/software/make/
+[Ninja]: http://martine.github.io/ninja/
+[Bear]: https://github.com/rizsotto/Bear
+[Clang]: http://clang.llvm.org/
+[clang-json]: http://clang.llvm.org/docs/JSONCompilationDatabase.html
 [emacs-clang-complete-async]: https://github.com/Golevka/emacs-clang-complete-async
 
 [cpputils-cmake]: https://github.com/redguardtoo/cpputils-cmake
