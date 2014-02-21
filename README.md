@@ -10,7 +10,7 @@ by only put source codes and build configuration file `CMakeFile.txt`.
 
 This mode can works with below.
 
-Build systems (This is requirements):
+Build systems (**This is requirements**):
 
   - [cmake][] (with (UNIX/MinGW/MSYS) Makefile generator)
 
@@ -30,12 +30,14 @@ Installation
 
 Basic setup:
 
-   (add-to-list 'load-path
+```
+(add-to-list 'load-path
                 "~/path-to-cc-check-and-completion-utility")
-   (require 'cc-check-and-completion-utility)
+(require 'cc-check-and-completion-utility)
 
-   (add-hook 'c-mode-hook 'cccc-mode)
-   (add-hook 'c++-mode-hook 'cccc-mode)
+(add-hook 'c-mode-hook 'cccc-mode)
+(add-hook 'c++-mode-hook 'cccc-mode)
+```
 
 Usage
 -----
