@@ -1,10 +1,10 @@
 cc-check-and-completion
 ========================
 
-Minor mode for auto configuration of C/C++ syntax checking and completion plugins with [cmake][].
+Minor mode for auto configuration of C/C++ syntax checking and completion packages with [cmake][].
 
 This mode get the compile options from build system [cmake][] and
-configure syntax checking and completion plugins. Not only that, you can
+configure syntax checking and completion packages. Not only that, you can
 generate build tree and compile and run it. So, you can use emacs like IDE
 by only put source codes and build configuration file `CMakeFile.txt`.
 

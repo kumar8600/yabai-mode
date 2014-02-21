@@ -35,7 +35,7 @@
 
 ;;; Commentary:
 
-;; Minor mode for auto configuration of C/C++ syntax checking and completion plugins.
+;; Minor mode for auto configuration of C/C++ syntax checking and completion packages.
 
 ;;
 ;; Basic setup:
@@ -753,10 +753,10 @@ If failure to guess what build system used, return nil."
   "The default lighter for cccc-mode.")
 
 (define-minor-mode cccc-mode
-  "Minor mode for auto configuration of C/C++ syntax checking and completion plugins.
+  "Minor mode for auto configuration of C/C++ syntax checking and completion packages.
 
 This mode get the compile options from build systems (like CMake) and
-configure syntax checking and completion plugins. Not only that, you can
+configure syntax checking and completion packages. Not only that, you can
 generate build tree and compile and run it. So, you can use emacs like IDE
 only put source codes and build configuration file (like CMakeFile.txt).
 
@@ -766,11 +766,11 @@ Build systems:
 
   - CMake (with (UNIX/MinGW) Makefile generator)
 
-Syntax check plugins:
+Syntax check packages:
 
   - Flycheck
 
-Completion (like Intellisense) plugins:
+Completion (like Intellisense) packages:
 
   - Company
   - emacs-clang-complete-async
