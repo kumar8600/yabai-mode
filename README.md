@@ -17,12 +17,12 @@ Build systems (**This is requirements**):
 Syntax check packages:
 
   - [flycheck][]
-  ..- >= 0.16
+    - >= 0.16
 
 Completion (like Intellisense) packages:
 
   - [company][]
-  ..- >= 0.5
+    - >= 0.5
   - [emacs-clang-complete-async][]
 
 Installation
@@ -52,7 +52,7 @@ Usage
 If you don't have build tree, this plugin ask you where build tree create. Build tree's name
 must `build`. If you want to change this name, customize variable `cccc/cmake-build-tree-name`.)
 
-#### Detail
+#### Advanced
 
 Compile option analysis can be controlled with `cccc/load-options` and
 `cccc/reload-options`. But you probably don't need call them directly. While cccc-mode
@@ -65,7 +65,7 @@ You can run executable file with `cccc/run`.
 
 If you want to compile and run, I recommend `cccc/compile-and-run`.
 
-#### Acceptable trees
+##### Acceptable trees
 
 If `CMakeFiles.txt` and build-tree `build` are exists at upper or current directory where source is opened exists,
 it is acceptable tree.
@@ -103,20 +103,20 @@ Customization
 There are customizable user options.
 
 - `cccc/cmake-build-tree-name`
-..- CMake's build tree name used when build-tree searching and creating.
-..- Default value is `"build"`.
+  - CMake's build tree name used when build-tree searching and creating.
+  - Default value is `"build"`.
 
 - `cccc/with-checker-flycheck`
-..- Set non-nil if you want to use [flycheck][] as checker.
-..- Default value is `t`.
+  - Set non-nil if you want to use [flycheck][] as checker.
+  - Default value is `t`.
 
 - `cccc/with-completer-company`
-..- Set non-nil if you want to use [company][] as checker.
-..- Default value is `t`.
+  - Set non-nil if you want to use [company][] as checker.
+  - Default value is `t`.
 
 - `cccc/with-completer-ac-clang-async`
-..- Set non-nil if you want to use [emacs-clang-complete-async][] as checker.
-..- Default value is `t`.
+  - Set non-nil if you want to use [emacs-clang-complete-async][] as checker.
+  - Default value is `t`.
 
 License
 -------
