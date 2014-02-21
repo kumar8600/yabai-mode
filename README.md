@@ -1,7 +1,7 @@
 cc-check-and-completion
 ========================
 
-Minor mode for auto configuration of C/C++ syntax checking and completion packages with [cmake][].
+Emacs minor mode for auto configuration of C/C++ syntax checking and completion packages with [cmake][].
 
 This mode get the compile options from build system [cmake][] and
 configure syntax checking and completion packages. Not only that, you can
