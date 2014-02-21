@@ -5,17 +5,17 @@ Emacs minor mode for auto configuration of C/C++ syntax checking and completion 
 
 This mode get the compile options from build system [CMake][] and
 configure syntax checking and completion packages. Not only that, you can
-generate build tree and compile and run it. So, you can use emacs like IDE
-by only put source codes and build configuration file `CMakeFile.txt`.
+generate build tree and compile and run it. **So, you can use emacs like IDE
+by only put source codes and build configuration file `CMakeFile.txt`.**
 
 This mode can works with...
 ---------------------------------
 
 #### Build systems (**Choose at least any one.**):
 
-  - [CMake][]
-    - with [Make][GNU Make] (default)
-	- with [Ninja][]
+  - [CMake][] with
+    - [Make][GNU Make] (default)
+	- [Ninja][]
   - Under constructions...
     - [Bear][]
     - [JSON Compilation Database Format][clang-json]
@@ -45,16 +45,15 @@ Basic setup:
 (add-hook 'c++-mode-hook 'cccc-mode)
 ```
 
-Usage
------
-
-#### Basic (with CMake)
+Basic Usage (with CMake)
+-------------
 
 1. Put source codes and `CMakeLists.txt` on your source tree.
-2. Create build-tree named `build`. (If you don't do it, this package asks you where is build-tree.)
+2. Create build-tree named `build`. (If you don't do it, this package asks you where do I create build-tree.)
 3. Just open your source code. Enjoy!
 
-#### Advanced
+Advanced Usage
+-------------
 
 Compile option analysis can be controlled with `cccc/load-options` and
 `cccc/reload-options`. But you probably don't need call them directly. While cccc-mode
