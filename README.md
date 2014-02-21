@@ -1,4 +1,4 @@
-cc-check-and-completion
+cc-check-and-completion-utility
 ========================
 
 Emacs minor mode for auto configuration of C/C++ syntax checking and completion packages with [cmake][].
