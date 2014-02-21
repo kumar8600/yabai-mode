@@ -6,7 +6,7 @@ Emacs minor mode for auto configuration of C/C++ syntax checking and completion 
 This mode get the compile options from build system [CMake][] and
 configure syntax checking and completion packages. Not only that, you can
 generate build tree and compile and run it. **So, you can use emacs like IDE
-by only put source codes and build configuration file `CMakeFile.txt`.**
+by only put source codes and build configuration file `CMakeLists.txt`.**
 
 This mode can works with...
 ---------------------------------
@@ -74,7 +74,7 @@ be `build`. If you want to change this name, customize variable `cccc/cmake-buil
 
 ###### Acceptable trees
 
-If `CMakeFiles.txt` and build-tree `build` are exists at upper or current directory where source is opened exists,
+If `CMakeLists.txt` and build-tree `build` are exists at upper or current directory where source is opened exists,
 it is acceptable tree.
 
 Example 1:
@@ -83,7 +83,7 @@ Example 1:
 .
 |-- build
 `-- src
-  |-- CMakeFiles.txt
+  |-- CMakeLists.txt
   |-- blah.cpp
   |-- blah.h
   `-- blahblah
@@ -97,7 +97,7 @@ Example 2:
 ```
 .
 |-- build
-|-- CMakeFiles.txt
+|-- CMakeLists.txt
 |-- blah.cpp
 .
 .
