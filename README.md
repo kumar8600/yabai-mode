@@ -124,9 +124,21 @@ License
 
 see `./LICENSE`
 
+Similar packages
+----------------
+
+- [cpputils-cmake][]
+- [emacs-cmake-project][]
+- [irony-mode][]
+- [rtags][]
 
 [flycheck]: https://github.com/flycheck/flycheck
 [company]: http://company-mode.github.io/
 [cmake]: http://www.cmake.org/
 [clang]: http://clang.llvm.org/
 [emacs-clang-complete-async]: https://github.com/Golevka/emacs-clang-complete-async
+
+[cpputils-cmake]: https://github.com/redguardtoo/cpputils-cmake
+[emacs-cmake-project]: https://github.com/alamaison/emacs-cmake-project
+[irony-mode]: https://github.com/Sarcasm/irony-mode
+[rtags]: https://github.com/Andersbakken/rtags/
