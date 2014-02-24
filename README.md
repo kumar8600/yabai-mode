@@ -3,7 +3,7 @@ YABAI - Yet Another Build-system Attentive Integration Mode
 
 Emacs minor mode for C/C++ syntax checking and completion with any build systems without any configuration in many cases.
 
-This mode get the compile options from build system ([CMake][] is default) and
+This mode get the compiler options from build system ([CMake][] is default) and
 integrate syntax checking and completion packages. Not only that, you can
 compile and run it. What you shuold do is to put source codes and build configuration file (e.g. `CMakeLists.txt`).
 
@@ -21,7 +21,7 @@ Compatible build systems
 	- Ninja
   - [JSON Compilation Database Format][clang-json] (check and completion only.)
 
-**At least one is required.**
+(*At least one is required.*)
 
 Packages can be integrated
 -------------------------------
@@ -58,7 +58,7 @@ Basic setup:
 (add-hook 'c++-mode-hook 'yabai-mode)
 ```
 
-Basic Usage (with CMake)
+Basic Usage (CMake with Make)
 -------------
 
 1. Put source codes and `CMakeLists.txt` on your source tree.
@@ -68,10 +68,10 @@ Basic Usage (with CMake)
 Advanced Usage
 -------------
 
-Compile option analysis can be controlled with `yabai/load-options` and
+Compiler option analysis can be controlled with `yabai/load-options` and
 `yabai/reload-options`. But you probably don't need to call them directly. While cccc-mode
 is enabled, those commands automatically called when you opened C/C++ sources or
-someone modified build configuration file.
+someone modified build configuration file. If something went wrong, please call `yabai/reload-options`.
 
 You can generate build tree with `yabai/generate-build-files`.  
 You can compile build tree with `yabai/compile`.  
@@ -79,22 +79,24 @@ You can run executable file with `yabai/run`.
 
 If you want to compile and run, I recommend `yabai/compile-and-run`.
 
+If you want to use other build system, please see below chapter [Customization](#customization).
+
 ##### CMake
 
 If valid `CMakeLists.txt` is exists at source code's directory or upper, it will work.
 If you don't have build tree, this plugin ask you where build tree create. Build tree's name must
-be `build`. If you want to change this name, customize variable `yabai/cmake-build-tree-name`.
+be `emacs-build`. If you want to change this name, customize variable `yabai/cmake-build-tree-name`.
 
-###### Acceptable trees
+###### CMake Acceptable trees
 
-If `CMakeLists.txt` and build-tree `build` are exists at upper or current directory where source is opened exists,
+If `CMakeLists.txt` and build-tree `emacs-build` are exists at upper or current directory where source is opened exists,
 it is acceptable tree.
 
 Example 1:
 
 ```
 .
-|-- build
+|-- emacs-build
 `-- src
   |-- CMakeLists.txt
   |-- blah.cpp
@@ -109,7 +111,7 @@ Example 2:
 
 ```
 .
-|-- build
+|-- emacs-build
 |-- CMakeLists.txt
 |-- blah.cpp
 .
@@ -121,15 +123,23 @@ Customization
 
 There are customizable user options.
 
-- `yabai/cmake-build-tree-name`
-  - CMake's build tree name used when build-tree searching and creating.
-  - Default value is `"emacs-build"`.
+- `yabai/build-system`
+  - Build system used for all integration.
+  - You can choose `cmake`, `make`, `ninja` and `json-compilation`.
+  - `make`, `ninja` and `json-compilation` mean **without** CMake.
+    - But `make` and `ninja` require [Bear][].
+  - Default value is `cmake`.
 
 - `yabai/cmake-generator`
   - CMake's build system generator.
-  - You can select `cmakefiles` or `ninja`.
-    - When select `cmakefiles` in windows, automatically detect environment
+  - You can select `make` or `ninja`.
+    - When you select `make` in windows, automatically detect environment
 	  and select `MinGW Makefiles` or `MSYS Makefiles` generators.
+  - Default value is `make`.
+
+- `yabai/cmake-build-tree-name`
+  - CMake's build tree name used when build-tree searching and creating.
+  - Default value is `"emacs-build"`.
 
 - `yabai/with-checker-flycheck`
   - Set non-nil if you want to use [Flycheck][] as checker.

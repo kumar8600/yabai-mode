@@ -73,7 +73,7 @@ See URL `https://github.com/Golevka/emacs-clang-complete-async'"
 (yabai/def-option-var yabai/build-system 'cmake
 		     "Build system used in this package.
 
-You can choose `cmake', `make', `ninja' and `json'.
+You can choose `cmake', `make', `ninja' and `json-compilation'.
 
 - `cmake' means CMake.
   - See URL `http://www.cmake.org/'.
@@ -84,7 +84,7 @@ You can choose `cmake', `make', `ninja' and `json'.
 - `ninja' means Make without CMake but with Bear (Build EAR).
   - See URL `http://martine.github.io/ninja/'
   - See URL `https://github.com/rizsotto/Bear'.
-- `json' means JSON Compilation Database Format Specification.
+- `json-compilation' means JSON Compilation Database Format Specification.
   - See URL `http://clang.llvm.org/docs/JSONCompilationDatabase.html'."
 		     :type 'symbol
 		     :options '(cmake bear json))
