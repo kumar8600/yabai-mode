@@ -41,12 +41,21 @@ Set up
 Basic setup:
 
 ```
-(add-to-list 'load-path
-                "~/path-to-cc-check-and-completion-utility")
-(require 'cc-check-and-completion-utility)
+(add-to-list 'load-path "~/path-to-*")
 
-(add-hook 'c-mode-hook 'cccc-mode)
-(add-hook 'c++-mode-hook 'cccc-mode)
+(require 'company)
+(require 'flycheck)
+(require 'yabai)
+
+;; enable Company mode in all buffers
+(add-hook 'after-init-hook 'global-company-mode)
+
+;; enable Flycheck mode in all buffers
+(add-hook 'after-init-hook #'global-flycheck-mode)
+
+;; enable YABAI mode in C/C++ buffers
+(add-hook 'c-mode-hook   'yabai-mode)
+(add-hook 'c++-mode-hook 'yabai-mode)
 ```
 
 Basic Usage (with CMake)
