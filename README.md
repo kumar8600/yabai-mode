@@ -7,7 +7,7 @@ This mode get the compile options from build system ([CMake][] is default) and
 integrate syntax checking and completion packages. Not only that, you can
 compile and run it. What you shuold do is to put source codes and build configuration file (e.g. `CMakeLists.txt`).
 
-*(YABAI (ÉÑÉoÉC) is the japanese slang means dangerous, awful and amazing etc...)*
+*(YABAI („É§„Éê„Ç§) is the japanese slang means dangerous, awful and amazing etc...)*
 
 Compatible build systems
 ---------------------------------
