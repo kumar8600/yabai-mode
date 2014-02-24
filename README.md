@@ -1,34 +1,38 @@
-cc-check-and-completion-utility
+YABAI - Yet Another Build-system Attentive Integration Mode
 ========================
 
-Emacs minor mode for auto configuration of C/C++ syntax checking and completion packages with [CMake][].
+Emacs minor mode for C/C++ syntax checking and completion with any build systems without any configuration in many cases.
 
-This mode get the compile options from build system [CMake][] and
-configure syntax checking and completion packages. Not only that, you can
-generate build tree and compile and run it. **So, you can use emacs like IDE
-by only put source codes and build configuration file `CMakeLists.txt`.**
+This mode get the compile options from build system ([CMake][] is default) and
+integrate syntax checking and completion packages. Not only that, you can
+compile and run it. What you shuold do is to put source codes and build configuration file (e.g. `CMakeLists.txt`).
 
-This mode can works with...
+*(YABAI (ƒ„ƒoƒC) is the japanese slang means dangerous, awful and amazing etc...)*
+
+Compatible build systems
 ---------------------------------
 
-#### Build systems (**Choose at least any one.**):
-
-  - [CMake][] with
-    - [Make][GNU Make] (default)
+  - [CMake][] (>= 2.8.5) with generator
+    - [Make][GNU Make] **(default)**
+	  -  works in UNIX / MinGW / MSYS
 	- [Ninja][]
-  - Under constructions...
-    - [Bear][]
-    - [JSON Compilation Database Format][clang-json]
+  - Without CMake ([Bear][] is required)
+    - Make
+	- Ninja
+  - [JSON Compilation Database Format][clang-json] (check and completion only.)
 
-#### Syntax check packages:
+**At least one is required.**
 
-  - [Flycheck][]
-    - >= 0.16
+Packages can be integrated
+-------------------------------
 
-#### Completion (like Intellisense) packages:
+##### Syntax check packages:
 
-  - [Company][]
-    - >= 0.5
+  - [Flycheck][] (>= 0.16)
+
+##### Completion (like Intellisense) packages:
+
+  - [Company][] (>= 0.5)
   - [emacs-clang-complete-async][]
 
 Set up
@@ -55,22 +59,22 @@ Basic Usage (with CMake)
 Advanced Usage
 -------------
 
-Compile option analysis can be controlled with `cccc/load-options` and
-`cccc/reload-options`. But you probably don't need call them directly. While cccc-mode
-is enabled, those commands automatically called when you open C/C++ sources and
+Compile option analysis can be controlled with `yabai/load-options` and
+`yabai/reload-options`. But you probably don't need to call them directly. While cccc-mode
+is enabled, those commands automatically called when you opened C/C++ sources or
 someone modified build configuration file.
 
-You can generate build tree with `cccc/generate-build-files`.
-You can compile build tree with `cccc/compile`.
-You can run executable file with `cccc/run`.
+You can generate build tree with `yabai/generate-build-files`.  
+You can compile build tree with `yabai/compile`.  
+You can run executable file with `yabai/run`.  
 
-If you want to compile and run, I recommend `cccc/compile-and-run`.
+If you want to compile and run, I recommend `yabai/compile-and-run`.
 
 ##### CMake
 
 If valid `CMakeLists.txt` is exists at source code's directory or upper, it will work.
 If you don't have build tree, this plugin ask you where build tree create. Build tree's name must
-be `build`. If you want to change this name, customize variable `cccc/cmake-build-tree-name`.
+be `build`. If you want to change this name, customize variable `yabai/cmake-build-tree-name`.
 
 ###### Acceptable trees
 
@@ -103,31 +107,30 @@ Example 2:
 .
 ```
 
-
 Customization
 -------------
 
 There are customizable user options.
 
-- `cccc/cmake-build-tree-name`
+- `yabai/cmake-build-tree-name`
   - CMake's build tree name used when build-tree searching and creating.
-  - Default value is `"build"`.
+  - Default value is `"emacs-build"`.
 
-- `cccc/cmake-generator`
+- `yabai/cmake-generator`
   - CMake's build system generator.
   - You can select `cmakefiles` or `ninja`.
     - When select `cmakefiles` in windows, automatically detect environment
 	  and select `MinGW Makefiles` or `MSYS Makefiles` generators.
 
-- `cccc/with-checker-flycheck`
+- `yabai/with-checker-flycheck`
   - Set non-nil if you want to use [Flycheck][] as checker.
   - Default value is `t`.
 
-- `cccc/with-completer-company`
+- `yabai/with-completer-company`
   - Set non-nil if you want to use [Company][] as checker.
   - Default value is `t`.
 
-- `cccc/with-completer-ac-clang-async`
+- `yabai/with-completer-ac-clang-async`
   - Set non-nil if you want to use [emacs-clang-complete-async][] as checker.
   - Default value is `t`.
 
