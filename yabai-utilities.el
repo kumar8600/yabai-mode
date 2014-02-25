@@ -52,18 +52,17 @@ FILENAME DIRECTORY are passed for 'expand-file-name."
 						directory))))
   (expand-file-name filename directory))
 
+(defun yabai/get-time-last-modified (filepath)
+  "Get the time last modified of file at FILEPATH."
+  (nth 5 (file-attributes filepath)))
+
 (defun yabai/file-name-equal (a b)
-  "Compare A with B file-name."
+  "Compare file-name A with B."
   (cl-flet ((format (fname)
 		    (directory-file-name
 		     (expand-file-name fname))))
     (string= (format a)
 	     (format b))))
-
-(defun yabai/get-time-last-modified (filepath)
-  "Get the time last modified of file at FILEPATH."
-  (nth 5 (file-attributes filepath)))
-
 ;;;; =======================================================================================
 ;;;; Build system defining API
 ;;;; =======================================================================================

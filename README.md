@@ -62,7 +62,7 @@ Basic Usage (CMake with Make)
 -------------
 
 1. Put source codes and `CMakeLists.txt` on your source tree.
-2. Create build-tree named `build`. (If you don't do it, this package asks you where do I create build-tree.)
+2. Create build-tree named `emacs-build`. (If you don't do it, this package asks you where do I create build-tree.)
 3. Just open your source code. Enjoy!
 
 Advanced Usage

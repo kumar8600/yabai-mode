@@ -241,7 +241,6 @@ compiler option analysis can be controlled with `yabai/load-options' and
 is enabled, those commands automatically called when you open C/C++ sources and
 someone modified build configuration file.
 
-You can generate build tree with `yabai/generate-build-files'.
 You can compile build tree with `yabai/compile'.
 You can run executable file with `yabai/run'.
 
