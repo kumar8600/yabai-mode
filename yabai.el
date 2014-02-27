@@ -3,7 +3,7 @@
 ;; Author: kumar8600 <kumar8600@gmail.com>
 ;; URL: https://github.com/kumar8600/yabai
 ;; Version: 0.30
-;; Package-Requires: ((cl-lib) (json))
+;; Package-Requires: ((cl-lib) (json) (async))
 
 ;; Copyright (c) 2014 by kumar8600
 ;; All rights reserved.
@@ -55,6 +55,7 @@
 
 (require 'cl-lib)
 (require 'json)
+(require 'async)
 
 (require 'yabai-definitions)
 (require 'yabai-utilities)
@@ -123,18 +124,21 @@ If fail to guess what build system used, return nil."
   
 (defun yabai/guess-and-set-options-impl ()
   "Guess compiler options and set it."
-  ;; guess options
-  (let ((options (or (yabai/guess-compiler-options yabai/build-system-in-local-buffer
-						   yabai/path-build-config-file
-						   (buffer-file-name))
-		     (error "There are no options guessed from %s" yabai/path-source-tree))))
-    ;; store guessed options
-    (setq-local yabai/stored-compiler-options options)
+  ;; guess options asynchronously
+  (async-start
+   (lambda ()
+     (or (yabai/guess-compiler-options yabai/build-system-in-local-buffer
+				       yabai/path-build-config-file
+				       (buffer-file-name))
+	 (error "There are no options guessed from %s" yabai/path-source-tree)))
+   (lambda (result)
+     ;; store guessed options
+    (setq-local yabai/stored-compiler-options result)
     ;; store build config file's time last modified
     (setq-local yabai/time-last-mod-build-config-file (yabai/get-time-last-modified
 						      yabai/path-build-config-file))
     ;; set guessed options
-    (yabai/set-compiler-options options)))
+    (yabai/set-compiler-options result))))
 
 (defun yabai/guess-and-set-options ()
   "Guess compiler options and set it.
