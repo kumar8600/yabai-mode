@@ -66,12 +66,13 @@ FILENAME DIRECTORY are passed for 'expand-file-name."
 ;;;; =======================================================================================
 ;;;; Build system defining API
 ;;;; =======================================================================================
-(defun yabai/define-build-system (name-symbol config-file pre-process options-getter compilation &optional build-tree-getter)
+(defun yabai/define-build-system (name-symbol config-file pre-process database-path-getter compilation &optional build-tree-getter)
   "Add build system (i.e. CMake) named NAME-SYMBOL.
 
 CONFIG-FILE is string describing name of default build configuration file
 of the build system (e.g. CMakeLists.txt).
-PRE-PROCESS is called before to get compiler options with OPTIONS-GETTER.
+PRE-PROCESS is called before to get compiler options by server.
+Database compilation server is passed database path from DATABASE-PATH-GETTER.
 If there are no PRE-PROCESS, please pass nil.
 When build, COMPILATION is called.
 When run, RUNNNING-DIR-FUNC is called to get path to build tree.
@@ -79,8 +80,8 @@ If nil, BUILD-TREE-GETTER is path to source-tree.
 
 PRE-PROCESS is function takes arguments
  `build-config' `source-tree' `finish-func'.
-OPTIONS-GETTER is function takes arguments
- `build-config' `source-file'.
+DATABASE-PATH-GETTER is function takes arguments
+ `build-config' `build-tree' `source-file'.
 COMPILATION is function takes arguments
  `build-config' `finish-func'.
 BUILD-TREE-GETTER is function takes no arguments.
@@ -93,12 +94,12 @@ BUILD-TREE-GETTER is function takes no arguments.
 
   (let ((func-alist (list (cons 'pre-process    (or pre-process
 						    #'yabai/dummy-pre-process))
-			  (cons 'config-file    config-file)
-			  (cons 'options-getter options-getter)
-			  (cons 'compilation    compilation)
-			  (cons 'build-tree-getter (or build-tree-getter
-						       (lambda ()
-							 (eval 'yabai/path-source-tree)))))))
+			  (cons 'config-file          config-file)
+			  (cons 'database-path-getter database-path-getter)
+			  (cons 'compilation          compilation)
+			  (cons 'build-tree-getter    (or build-tree-getter
+							  (lambda ()
+							    (eval 'yabai/path-source-tree)))))))
     (add-to-list 'yabai/build-system-definitions (cons name-symbol func-alist))))
 
 ;;;; Utilities
@@ -110,16 +111,16 @@ BUILD-TREE-GETTER is function takes no arguments.
   "Get TARGET's pre process function from BUILD-SYSTEMS."
   (cdr (assoc 'pre-process (cdr (assoc target yabai/build-system-definitions)))))
 
-(defun yabai/build-system-get-options-getter-func (target)
-  "Get TARGET's pre process function from BUILD-SYSTEMS."
+(defun yabai/build-system-get-database-path-getter-func (target)
+  "Get TARGET's database path getter function from BUILD-SYSTEMS."
   (cdr (assoc 'options-getter (cdr (assoc target yabai/build-system-definitions)))))
 
 (defun yabai/build-system-get-compilation-func (target)
-  "Get TARGET's pre process function from BUILD-SYSTEMS."
+  "Get TARGET's compilation function from BUILD-SYSTEMS."
   (cdr (assoc 'compilation (cdr (assoc target yabai/build-system-definitions)))))
 
 (defun yabai/build-system-get-build-tree-getter-func (target)
-  "Get TARGET's pre process function from BUILD-SYSTEMS."
+  "Get TARGET's build tree getter function from BUILD-SYSTEMS."
   (cdr (assoc 'build-tree-getter (cdr (assoc target yabai/build-system-definitions)))))
 
 (defun yabai/get-possible-config-file-name-list ()

@@ -1,4 +1,3 @@
-
 ;;; yabai-definitions.el --- yabai-mode backend for implementation definitions
 
 ;; Author: kumar8600 <kumar8600@gmail.com>

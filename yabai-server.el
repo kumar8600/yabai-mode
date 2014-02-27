@@ -32,6 +32,14 @@
 
 ;;; Commentary:
 
+;; stdin get the list printed by `print'.
+;; Valid list:
+;; ("/buffer/file/path" 'function-symbol arg1 arg2 arg3...)
+;;
+;; Funcrions:
+;; add-database (database-path)
+;; get-options (src-file-path database-path)
+
 ;;; Code:
 (add-to-list 'load-path (file-name-directory load-file-name))
 

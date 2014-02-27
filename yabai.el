@@ -62,6 +62,7 @@
 (require 'yabai-build-bear)
 (require 'yabai-build-json-compilation)
 (require 'yabai-integrators)
+(require 'yabai-client)
 
 ;;;; Setting options =======================================================================
 (defun yabai/set-compiler-options (options)
@@ -72,6 +73,7 @@
 		     options)))
 	yabai/integration-definitions))
 
+;;;; Paths detection and confirmation ======================================================
 (defun yabai/find-paths-and-set-local ()
   "Set buffer local variables about paths.
 
@@ -94,7 +96,7 @@ will be written."
     (setq-local yabai/path-source-tree (file-name-directory
 					yabai/path-build-config-file))))
 
-(defun yabai/is-set-paths-buffer-local ()
+(defun yabai/are-set-paths-buffer-local ()
   "If buffer local variables about paths are set, return t.
 
 `yabai/path-build-config-file'
@@ -111,35 +113,18 @@ will be tested."
       t
     nil))
 
-;;;; Gluing guessing and setting ==================================================================
-(defun yabai/guess-compiler-options (build-system build-config-path src-file-path)
-  "Return options are guessed from BUILD-SYSTEM's configuration file and any.
+;;;; Sending compilation database to server ==================================================================
+(defun yabai/add-database-current-buffer-to-server ()
+  "Add compilation database used by current buffer to server."
+  (let ((database-path-getter (yabai/build-system-get-database-path-getter-func yabai/build-system-in-local-buffer))
+	(build-tree-getter (yabai/build-system-get-build-tree-getter-func yabai/build-system-in-local-buffer)))
+    (yabai/client-request-add-database (funcall database-path-getter
+						yabai/path-build-config-file
+						(funcall build-tree-getter)
+						(buffer-file-name)))))
 
-Any means BUILD-CONFIG-PATH and SRC-FILE-PATH.
-If fail to guess what build system used, return nil."
-  (funcall (yabai/build-system-get-options-getter-func build-system)
-	   build-config-path
-	   src-file-path))
-  
-(defun yabai/guess-and-set-options-impl ()
-  "Guess compiler options and set it."
-  ;; guess options
-  (let ((options (or (yabai/guess-compiler-options yabai/build-system-in-local-buffer
-						   yabai/path-build-config-file
-						   (buffer-file-name))
-		     (error "There are no options guessed from %s" yabai/path-source-tree))))
-    ;; store guessed options
-    (setq-local yabai/stored-compiler-options options)
-    ;; store build config file's time last modified
-    (setq-local yabai/time-last-mod-build-config-file (yabai/get-time-last-modified
-						      yabai/path-build-config-file))
-    ;; set guessed options
-    (yabai/set-compiler-options options)))
-
-(defun yabai/guess-and-set-options ()
-  "Guess compiler options and set it.
-
-If needed, generate or compile build tree."
+(defun yabai/generate-database-and-add-to-server ()
+  "Generate compiler option database, send to database server."
   (let ((pre-process (yabai/build-system-get-pre-process-func yabai/build-system-in-local-buffer)))
     ;; generate build-tree
     (funcall pre-process
@@ -149,9 +134,18 @@ If needed, generate or compile build tree."
 	       (if process
 		   (with-current-buffer (yabai/gethash-process->buffer process)
 		     (unless (yabai/is-string-event-finished event)
-		       (error "YABAI guessing failed"))
-		     (yabai/guess-and-set-options-impl))
-		 (yabai/guess-and-set-options-impl))))))
+		       (error "YABAI pre process of compilation database generation failed"))
+		     (yabai/add-database-current-buffer-to-server)))))))
+
+;;;; Get compilation options from server =====================================================================
+;; (defun yabai/compilation-database-server-filter (proc str)
+;;   "Filter function of compilation database server.
+
+;; PROC and STR is arguments."
+;;   (let ((it 0))
+;;     (let ((lst (read-from-string str it)))
+;;       (setq it (cdr lst))
+;;       (
 
 ;;;; User interfaces ============================================================
 
@@ -170,7 +164,7 @@ If needed, generate or compile build tree."
 (defun yabai/reload-options ()
   "Reload compiler options from paths had already defined."
   (interactive)
-  (unless (yabai/is-set-paths-buffer-local)
+  (unless (yabai/are-set-paths-buffer-local)
     (error "Please call `yabai/load-options' first"))
   (yabai/guess-and-set-options))
 
@@ -191,16 +185,21 @@ If needed, generate or compile build tree."
   "Associations list yabai need to hook.")
 
 (defun yabai/mode-start ()
-  "Start yabai.  Add local hooks."
+  "Start yabai.  Add local hooks and launch server."
   (mapc (lambda (item)
 	  (add-hook (car item) (cdr item) nil t))
-	yabai/hooks-alist))
+	yabai/hooks-alist)
+  (unless (yabai/client-is-server-working)
+    (yabai/start-server)
+    (yabai/client-set-process-filter nil)))
 
 (defun yabai/mode-stop ()
-  "Stop yabai.  Remove local hooks."
+  "Stop yabai.  Remove local hooks and finish server."
   (mapc (lambda (item)
 	  (remove-hook (car item) (cdr item) t))
-	yabai/hooks-alist))
+	yabai/hooks-alist)
+  (when (yabai/client-is-server-working)
+    (yabai/stop-server)))
 
 (defun yabai/debug-init ()
   "Just init yabai normally."
@@ -259,7 +258,7 @@ If you want to compile and run, I recommend `yabai/compile-and-run'."
 
 Finally, FINISH-FUNC will be called."
   (interactive)
-  (unless (yabai/is-set-paths-buffer-local)
+  (unless (yabai/are-set-paths-buffer-local)
     (error "Please call ``yabai/load-options' first"))
   (save-some-buffers)
   (funcall (yabai/build-system-get-compilation-func yabai/build-system-in-local-buffer)
@@ -300,7 +299,7 @@ Finally, FINISH-FUNC will be called."
 (defun yabai/open-build-config-file ()
   "Open build config file now using."
   (interactive)
-  (unless (yabai/is-set-paths-buffer-local)
+  (unless (yabai/are-set-paths-buffer-local)
     (error "Please call ``yabai/load-options' first"))
   (find-file yabai/path-build-config-file))
 
