@@ -121,6 +121,18 @@ will be tested."
 ;;   (funcall (yabai/build-system-get-options-getter-func build-system)
 ;; 	   build-config-path
 ;; 	   src-file-path))
+(defun yabai/compilation-alist-to-options-object (compilation-alist)
+  "Convert COMPILATION-ALIST to yabai/options object."
+  (let ((compile-command (cdr (assoc 'command compilation-alist)))
+	(compile-dir (cdr (assoc 'directory compilation-alist))))
+    (yabai/string-to-compiler-option-object (if (eq system-type 'windows-nt)
+						(yabai/msbuild-insert-rsp compile-command
+									  (file-name-directory
+									   (yabai/build-system-get-db-path
+									    yabai/build-system-in-local-buffer
+									    yabai/path-build-config-file)))
+					      compile-command)
+					    compile-dir)))
 
 (defun yabai/guess-and-set-options-impl ()
   "Guess compiler options and set it."
@@ -129,24 +141,17 @@ will be tested."
 				   yabai/path-build-config-file)
    (buffer-file-name)
    ;; finish func
-   (lambda (compilation-alist)
-     ;; (when (cl-find (downcase (file-name-extension (buffer-file-name)))
-     ;; 		    '("cpp" "cxx" "cc" "c")
-     ;; 		    :test #'string=)
-     ;;  (error "Hint: you should add this file for Build-configuration-file.  I'll recommend to do `M-x yabai/open-build-config-file'"))
-     ;; convert compile info to yabai/options.
-     (let ((compile-command (cdr (assoc 'command compilation-alist)))
-	   (compile-dir (cdr (assoc 'directory compilation-alist)))
-	   (compile-file (cdr (assoc 'file compilation-alist))))
-       (let ((options (yabai/string-to-compiler-option-object (if (eq system-type 'windows-nt)
-								  (yabai/msbuild-insert-rsp compile-command
-											    (file-name-directory
-											     (yabai/build-system-get-db-path
-											      yabai/build-system-in-local-buffer
-											      yabai/path-build-config-file)))
-								compile-command)
-							      compile-dir)))
-	 (with-current-buffer (get-file-buffer compile-file)
+   (lambda (result)
+     (let ((src-file-path (car result))
+	   (compilation-alist (cdr result)))
+       (unless compilation-alist
+	 (when (cl-find (downcase (file-name-extension src-file-path))
+			'("cpp" "cxx" "cc" "c")
+			:test #'string=)
+	   (error "Hint: you should add this file for Build-configuration-file.  I'll recommend to do `M-x yabai/open-build-config-file'")))
+       ;; convert compile info to yabai/options.
+       (let ((options (yabai/compilation-alist-to-options-object compilation-alist)))
+	 (with-current-buffer (get-file-buffer src-file-path)
 	   ;; store guessed options
 	   (setq-local yabai/stored-compiler-options options)
 	   ;; store build config file's time last modified

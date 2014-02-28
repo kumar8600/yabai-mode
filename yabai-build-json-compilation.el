@@ -53,13 +53,13 @@ Finally, FINISH-FUNC is called."
      ;; parse JSON file.
      (let ((db-arr (json-read-file compile-commands-json-path)))
        ;; find src-file's first compilation data.
-       (cl-find-if (lambda (item)
-		     (let ((file-path (cdr (assoc 'file item))))
-		       (if (string= (directory-file-name (expand-file-name file-path))
-				    (directory-file-name (expand-file-name src-file-path)))
-			   item
-			 nil)))
-		   db-arr)))
+       (cons src-file-path (cl-find-if (lambda (item)
+					 (let ((file-path (cdr (assoc 'file item))))
+					   (if (string= (directory-file-name (expand-file-name file-path))
+							(directory-file-name (expand-file-name src-file-path)))
+					       item
+					     nil)))
+				       db-arr))))
    finish-func))
 
 (defun yabai/json-get-db-path (build-config build-tree)
