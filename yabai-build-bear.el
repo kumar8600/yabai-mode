@@ -47,14 +47,12 @@ BUILD-SYSTEM, BUILD-CONFIG, SOURCE-TREE and FINISH-FUNC are arguments."
   (yabai/bear-compile build-system build-config finish-func))
 
 ;;;; =============================================================================================
-;;;; Compile option Guessing
+;;;; JSON compilation database path provider
 ;;;; =============================================================================================
-(defun yabai/bear-guess-options (build-config-path src-file-path)
-  "Guess options by JSON database is Bear outputed.
-
-BUILD-SYSTEM, BUILD-CONFIG-PATH and SRC-FILE-PATH are arguments."
-  (yabai/json-compilation-get-options (file-name-nondirectory build-config-path)
-				      src-file-path))
+(defun yabai/bear-get-db-path (build-config build-tree)
+  "From BUILD-CONFIG and BUILD-TREE, return path to JSON compilation db."
+  (expand-file-name "compile_commands.json"
+		    (file-name-directory build-config)))
 
 ;;;; =============================================================================================
 ;;;; Compile
@@ -78,7 +76,7 @@ Finally, FINISH-FUNC will be called."
 			   "Makefile"
 			   (lambda (build-config source-tree finish-func)
 			     (yabai/bear-pre-process 'make build-config source-tree finish-func))
-			   #'yabai/bear-guess-options
+			   #'yabai/bear-get-db-path
 			   (lambda (build-config finish-func)
 			     (yabai/bear-compile 'make build-config finish-func)))
 
@@ -89,7 +87,7 @@ Finally, FINISH-FUNC will be called."
 			   "Makefile"
 			   (lambda (build-config source-tree finish-func)
 			     (yabai/bear-pre-process 'ninja build-config source-tree finish-func))
-			   #'yabai/bear-guess-options
+			   #'yabai/bear-get-db-path
 			   (lambda (build-config finish-func)
 			     (yabai/bear-compile 'ninja build-config finish-func)))
 

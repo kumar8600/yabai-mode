@@ -34,48 +34,37 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-(require 'json)
 (require 'yabai-utilities)
+(require 'async)
+(require 'json)
 
 ;;;; =============================================================================================
 ;;;; Compile option parsing
 ;;;; =============================================================================================
-(defun yabai/json-compilation-read-file (compile-commands-json-path)
-  "Parse JSON from COMPILE-COMMANDS-JSON-PATH."
-    (json-read-file compile-commands-json-path))
+(defun yabai/json-compilation-read-and-find (compile-commands-json-path src-file-path finish-func)
+  "Parse JSON from COMPILE-COMMANDS-JSON-PATH.  And find SRC-FILE-PATH.
 
-(defun yabai/json-compilation-find-compile-info (src-file-path info-alists)
-  "Find a compile info take source SRC-FILE-PATH from INFO-ALISTS."
-  (cl-find-if (lambda (item)
-		(let ((file-path (cdr (assoc 'file item))))
-		  (if (yabai/file-name-equal file-path
-					    src-file-path)
-		      item
-		    nil)))
-	      info-alists))
+Finally, FINISH-FUNC is called."
+  (async-start
+   `(lambda ()
+     (require 'json)
+     (require 'cl-lib)
+     ,(async-inject-variables "\\(compile-commands-json-path\\|src-file-path\\|finish-func\\)")
+     ;; parse JSON file.
+     (let ((db-arr (json-read-file compile-commands-json-path)))
+       ;; find src-file's first compilation data.
+       (cl-find-if (lambda (item)
+		     (let ((file-path (cdr (assoc 'file item))))
+		       (if (string= (directory-file-name (expand-file-name file-path))
+				    (directory-file-name (expand-file-name src-file-path)))
+			   item
+			 nil)))
+		   db-arr)))
+   finish-func))
 
-(defun yabai/json-compilation-get-options (compile-commands-json-path src-file-path)
-  "From COMPILE-COMMANDS-JSON-PATH, parse and get compile options of SRC-FILE-PATH."
-  (let ((compile-info-alists (yabai/json-compilation-read-file compile-commands-json-path)))
-    ;; find compile info for SRC-FILE-PATH.
-    (let ((compile-info-alist (or (yabai/json-compilation-find-compile-info src-file-path
-									   compile-info-alists)
-				  (progn (when (cl-find (downcase (file-name-extension src-file-path))
-							'("cpp" "cc" "c")
-							:test #'string=)
-					   (message "Hint: you should add this file for `CMakeFiles.txt'. I'll recommend to do `M-x yabai/open-build-config-file'"))
-					 ;; If SRC-FILE-PATH not found in COMPILE-INFO-ALISTS, use first item.
-					 (aref compile-info-alists 0)))))
-      ;; convert compile info to yabai/options.
-      (let ((compile-command (cdr (assoc 'command compile-info-alist)))
-	    (compile-dir (cdr (assoc 'directory compile-info-alist))))
-	(yabai/string-to-compiler-option-object (if (eq system-type 'windows-nt)
-						  (yabai/msbuild-insert-rsp compile-command
-									   (file-name-directory
-									    compile-commands-json-path))
-						compile-command)
-					      compile-dir)))))
+(defun yabai/json-get-db-path (build-config build-tree)
+  "From BUILD-CONFIG and BUILD-TREE, return path to JSON compilation db."
+  build-config)
 
 (defun yabai/json-compilation-compile (build-config finish-func)
   "Compile from JSON Compilation Database at BUILD-CONFIG.
@@ -89,7 +78,7 @@ Finally, FINISH-FUNC is called."
 (yabai/define-build-system 'json-compilation
 			   "compile_commands.json"
 			   nil
-			   #'yabai/json-compilation-get-options
+			   #'yabai/json-get-db-path
 			   #'yabai/json-compilation-compile
 			   nil)
 

@@ -113,32 +113,47 @@ will be tested."
     nil))
 
 ;;;; Gluing guessing and setting ==================================================================
-(defun yabai/guess-compiler-options (build-system build-config-path src-file-path)
-  "Return options are guessed from BUILD-SYSTEM's configuration file and any.
+;; (defun yabai/guess-compiler-options (build-system build-config-path src-file-path)
+;;   "Return options are guessed from BUILD-SYSTEM's configuration file and any.
 
-Any means BUILD-CONFIG-PATH and SRC-FILE-PATH.
-If fail to guess what build system used, return nil."
-  (funcall (yabai/build-system-get-options-getter-func build-system)
-	   build-config-path
-	   src-file-path))
-  
+;; Any means BUILD-CONFIG-PATH and SRC-FILE-PATH.
+;; If fail to guess what build system used, return nil."
+;;   (funcall (yabai/build-system-get-options-getter-func build-system)
+;; 	   build-config-path
+;; 	   src-file-path))
+
 (defun yabai/guess-and-set-options-impl ()
   "Guess compiler options and set it."
-  ;; guess options asynchronously
-  (async-start
-   (lambda ()
-     (or (yabai/guess-compiler-options yabai/build-system-in-local-buffer
-				       yabai/path-build-config-file
-				       (buffer-file-name))
-	 (error "There are no options guessed from %s" yabai/path-source-tree)))
-   (lambda (result)
-     ;; store guessed options
-    (setq-local yabai/stored-compiler-options result)
-    ;; store build config file's time last modified
-    (setq-local yabai/time-last-mod-build-config-file (yabai/get-time-last-modified
-						      yabai/path-build-config-file))
-    ;; set guessed options
-    (yabai/set-compiler-options result))))
+  (yabai/json-compilation-read-and-find
+   (yabai/build-system-get-db-path yabai/build-system-in-local-buffer
+				   yabai/path-build-config-file)
+   (buffer-file-name)
+   ;; finish func
+   (lambda (compilation-alist)
+     ;; (when (cl-find (downcase (file-name-extension (buffer-file-name)))
+     ;; 		    '("cpp" "cxx" "cc" "c")
+     ;; 		    :test #'string=)
+     ;;  (error "Hint: you should add this file for Build-configuration-file.  I'll recommend to do `M-x yabai/open-build-config-file'"))
+     ;; convert compile info to yabai/options.
+     (let ((compile-command (cdr (assoc 'command compilation-alist)))
+	   (compile-dir (cdr (assoc 'directory compilation-alist)))
+	   (compile-file (cdr (assoc 'file compilation-alist))))
+       (let ((options (yabai/string-to-compiler-option-object (if (eq system-type 'windows-nt)
+								  (yabai/msbuild-insert-rsp compile-command
+											    (file-name-directory
+											     (yabai/build-system-get-db-path
+											      yabai/build-system-in-local-buffer
+											      yabai/path-build-config-file)))
+								compile-command)
+							      compile-dir)))
+	 (with-current-buffer (get-file-buffer compile-file)
+	   ;; store guessed options
+	   (setq-local yabai/stored-compiler-options options)
+	   ;; store build config file's time last modified
+	   (setq-local yabai/time-last-mod-build-config-file (yabai/get-time-last-modified
+							      yabai/path-build-config-file))
+	   ;; set guessed options
+	   (yabai/set-compiler-options options)))))))
 
 (defun yabai/guess-and-set-options ()
   "Guess compiler options and set it.

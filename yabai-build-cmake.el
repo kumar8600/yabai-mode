@@ -189,22 +189,12 @@ If cmake build tree path is not defined, detect or choose."
   (yabai/cmake-generate-build-files source-tree yabai/path-cmake-build-tree finish-func))
 
 ;;;; =============================================================================================
-;;;; Compile option guessing
+;;;; JSON compilation database path provider
 ;;;; =============================================================================================
-(defun yabai/cmake-get-options (build-config src-file-path)
-  "From path BUILD-CONFIG's build tree, guess compile options for SRC-FILE-PATH.
-
-SRC-FILE-PATH is path to the file you are opening.
-BUILD-CONFIG is now ignored.
-
-Note:
-Guessing way is parsing `compile_commands.json' this is clang's JSON Compilation
-Database Format.
-If build tree was made for compiler `gcc' or `clang', it will be success.
-I don't know more clean way.  If you know, tell me please."
-  (let ((compile-commands-json-path (expand-file-name "compile_commands.json"
-						      yabai/path-cmake-build-tree)))
-    (yabai/json-compilation-get-options compile-commands-json-path src-file-path)))
+(defun yabai/cmake-get-db-path (build-config build-tree)
+  "From BUILD-CONFIG and BUILD-TREE, return path to JSON compilation db."
+  (expand-file-name "compile_commands.json"
+		    build-tree))
 
 ;;;; =============================================================================================
 ;;;; Compile
@@ -225,7 +215,7 @@ Finally, FINISH-FUNC will be called."
 (yabai/define-build-system 'cmake
 			   "CMakeLists.txt"
 			   #'yabai/cmake-pre-process
-			   #'yabai/cmake-get-options
+			   #'yabai/cmake-get-db-path
 			   #'yabai/cmake-compile
 			   (lambda ()
 			     (eval 'yabai/path-cmake-build-tree)))
