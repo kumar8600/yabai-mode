@@ -65,6 +65,7 @@
 				    yabai/emacs-executable
 				    yabai/server-el-path))))
     (set-process-query-on-exit-flag prc nil)
+    (set-process-filter prc #'yabai/client-filter-function)
     (setq yabai/server-process prc)))
 
 (defun yabai/stop-server ()
@@ -74,6 +75,27 @@
     (error "To begin with, compilation database server is not working"))
   (interrupt-process yabai/server-process))
 
+;;;; Variable
+(defvar yabai/client-identifier->buffer-sentinel-table (make-hash-table :test 'equal))
+
+(defun yabai/client-filter-function (proc str)
+  "When server outputed something, this function is called.
+
+This function provides mechanism of sentinel.
+PROC and STR are arguments passed by Emacs."
+  (let ((it 0))
+    (let ((lst (read-from-string str it)))
+      (setq it (cdr lst))
+      (let ((identifier (car lst))
+	    (result (cdr lst)))
+	(let ((buffer-sentinel (gethash identifier yabai/client-identifier->buffer-sentinel-table)))
+	  (when buffer-sentinel
+	    (let ((buffer (car buffer-sentinel))
+		  (sentinel (cdr buffer-sentinel)))
+	      (with-current-buffer buffer
+		(funcall sentinel result))
+	      (remhash identifier yabai/client-identifier->buffer-sentinel-table))))))))
+
 (defun yabai/client-send-string-to-server (str)
   "Send STR to the compilation database server."
   (let ((status (process-status yabai/server-process)))
@@ -81,6 +103,23 @@
       (error "Compilation database server is not working")))
   (process-send-string yabai/server-process
 		       str))
+
+(defun yabai/client-send-list-to-server (lst)
+  "Send LST to the compilation database server."
+  (yabai/client-send-string-to-server (concat (prin1-to-string lst) "\n")))
+
+(defun yabai/client-request (lst &optional sentinel)
+  "Send request LST to server.
+
+When the job is end, SENTINEL is called.
+SENTINEL is function takes argument RESULT.
+RESULT is object."
+  (let ((identifier (make-temp-name (buffer-file-name))))
+    (when sentinel
+      (puthash identifier
+	       (cons (current-buffer) sentinel)
+	       yabai/client-identifier->buffer-sentinel-table))
+    (yabai/client-send-list-to-server (cons identifier lst))))
 
 ;;;;====================================================================================
 ;;;; Utilities
@@ -93,33 +132,32 @@
 	t
       nil)))
 
-(defun yabai/client-send-list-to-server (lst)
-  "Send LST to the compilation database server."
-  (yabai/client-send-string-to-server (concat (prin1-to-string lst) "\n")))
-
-(defun yabai/client-request-add-database (database-path &optional src-file-path)
+(defun yabai/client-request-add-database (database-path &optional sentinel)
   "Add compilation database at DATABASE-PATH to server.
 
-SRC-FILE-PATH is identifer of this job.
-If this is nil, it is set buffer file name"
-  (unless src-file-path
-    (setq src-file-path (buffer-file-name)))
-  (let ((lst (list src-file-path 'add-database database-path)))
-    (yabai/client-send-list-to-server lst)))
+When this job is end, SENTINEL is called.
+SENTINEL is function takes argument RESULT.
+RESULT is object."
+  (let ((lst (list 'add-database database-path)))
+    (yabai/client-request lst sentinel)))
 
-(defun yabai/client-request-get-options (src-file-path database-path)
-  "Get compilation options of SRC-FILE-PATH defined in DATABASE-PATH from server."
-  (let ((lst (list src-file-path 'get-options src-file-path database-path)))
-    (yabai/client-send-list-to-server lst)))
+(defun yabai/client-request-get-options (src-file-path database-path &optional sentinel)
+  "Request to get compilation options of SRC-FILE-PATH defined in DATABASE-PATH.
 
-(defun yabai/client-set-process-filter (filter)
-  "Set process FILTER function to database server process."
-  (let ((status (process-status yabai/server-process)))
-    (unless (or (eq status 'run)
-		(eq status 'stop))
-      (error "Compilation database server is not working")))
-  (set-process-filter yabai/server-process
-		      filter))
+When this job is end, SENTINEL is called.
+SENTINEL is function takes argument RESULT.
+RESULT is object."
+  (let ((lst (list 'get-options src-file-path database-path)))
+    (yabai/client-request lst sentinel)))
+
+;; (defun yabai/client-set-process-filter (filter)
+;;   "Set process FILTER function to database server process."
+;;   (let ((status (process-status yabai/server-process)))
+;;     (unless (or (eq status 'run)
+;; 		(eq status 'stop))
+;;       (error "Compilation database server is not working")))
+;;   (set-process-filter yabai/server-process
+;; 		      filter))
 
 (provide 'yabai-client)
 

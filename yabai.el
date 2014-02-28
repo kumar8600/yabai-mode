@@ -107,23 +107,38 @@ and build system now selecting's build-tree
 will be tested."
   (if (and yabai/path-build-config-file
 	   yabai/path-source-tree
-	   ;;yabai/path-build-tree
 	   yabai/build-system-in-local-buffer
 	   yabai/time-last-mod-build-config-file)
       t
     nil))
 
-;;;; Sending compilation database to server ==================================================================
-(defun yabai/add-database-current-buffer-to-server ()
-  "Add compilation database used by current buffer to server."
-  (let ((database-path-getter (yabai/build-system-get-database-path-getter-func yabai/build-system-in-local-buffer))
-	(build-tree-getter (yabai/build-system-get-build-tree-getter-func yabai/build-system-in-local-buffer)))
-    (yabai/client-request-add-database (funcall database-path-getter
-						yabai/path-build-config-file
-						(funcall build-tree-getter)
-						(buffer-file-name)))))
+;;;; Control compilation database server ==================================================================
+(defun yabai/get-compiler-option-current-buffer-from-server ()
+  "Get compiler option for current buffer from compilaition database server."
+  (yabai/client-request-get-options (buffer-file-name)
+				    (yabai/build-system-get-database-path-current-buffer)
+				    (lambda (result)
+				      (when result
+					(yabai/set-compiler-options result)))))
 
-(defun yabai/generate-database-and-add-to-server ()
+(defun yabai/add-database-current-buffer-to-server (&optional sentinel)
+  "Add compilation database used by current buffer to server.
+
+When works over, SENTINEL is called."
+  (yabai/client-request-add-database (yabai/build-system-get-database-path-current-buffer)
+				     sentinel))
+
+(defun yabai/add-database-and-get-compiler-options-current-buffer ()
+  "Add compilation database and get compiler options.
+
+All values get from current buffer."
+  (yabai/add-database-current-buffer-to-server
+   (lambda (result)
+     (when (string= result
+		    "add-database-ok")
+       (yabai/get-compiler-option-current-buffer-from-server)))))
+
+(defun yabai/generate-database-add-to-server-and-get-compiler-options ()
   "Generate compiler option database, send to database server."
   (let ((pre-process (yabai/build-system-get-pre-process-func yabai/build-system-in-local-buffer)))
     ;; generate build-tree
@@ -134,18 +149,9 @@ will be tested."
 	       (if process
 		   (with-current-buffer (yabai/gethash-process->buffer process)
 		     (unless (yabai/is-string-event-finished event)
-		       (error "YABAI pre process of compilation database generation failed"))
-		     (yabai/add-database-current-buffer-to-server)))))))
-
-;;;; Get compilation options from server =====================================================================
-;; (defun yabai/compilation-database-server-filter (proc str)
-;;   "Filter function of compilation database server.
-
-;; PROC and STR is arguments."
-;;   (let ((it 0))
-;;     (let ((lst (read-from-string str it)))
-;;       (setq it (cdr lst))
-;;       (
+		       (error "YABAI compilation database generation failed"))
+		     (yabai/add-database-and-get-compiler-options-current-buffer))
+		 (yabai/add-database-and-get-compiler-options-current-buffer))))))
 
 ;;;; User interfaces ============================================================
 
@@ -159,14 +165,14 @@ will be tested."
 	  ;;    
 	  (yabai/find-paths-and-set-local))
     ;; LET'S BEGIN
-    (yabai/guess-and-set-options)))
+    (yabai/generate-database-add-to-server-and-get-compiler-options)))
 
 (defun yabai/reload-options ()
   "Reload compiler options from paths had already defined."
   (interactive)
   (unless (yabai/are-set-paths-buffer-local)
     (error "Please call `yabai/load-options' first"))
-  (yabai/guess-and-set-options))
+  (yabai/generate-database-add-to-server-and-get-compiler-options))
 
 (defun yabai/reload-options-if-build-config-is-updated ()
   "If build config file is not one last loaded, reload."
@@ -190,8 +196,7 @@ will be tested."
 	  (add-hook (car item) (cdr item) nil t))
 	yabai/hooks-alist)
   (unless (yabai/client-is-server-working)
-    (yabai/start-server)
-    (yabai/client-set-process-filter nil)))
+    (yabai/start-server)))
 
 (defun yabai/mode-stop ()
   "Stop yabai.  Remove local hooks and finish server."

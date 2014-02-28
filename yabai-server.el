@@ -101,14 +101,14 @@ Value are array of compiler options.")
 (defun yabai/server-mainloop ()
   "Receive a list and do it and print alist of buffer and yabai/options."
   (let ((lst (car (read-from-string (read-string "")))))
-    (let ((file-name (car lst))
+    (let ((identifier (car lst))
 	  (func-symbol (cadr lst))
 	  (arg-lst (cddr lst)))
-      (print (cons file-name (ignore-errors
-			       (apply (cl-case func-symbol
-					('add-database #'yabai/server-add-database)
-					('get-options  #'yabai/server-get-options))
-				      arg-lst)))))))
+      (print (cons identifier (ignore-errors
+				(apply (cl-case func-symbol
+					 ('add-database #'yabai/server-add-database)
+					 ('get-options  #'yabai/server-get-options))
+				       arg-lst)))))))
 
 ;;;;====================================================================================
 ;;;; Entry point

@@ -154,10 +154,11 @@ You can choose `cmake', `make', `ninja' and `json-compilation'.
   "Get KEY's value from global process->buffer-table."
   (gethash key yabai/process->buffer-table))
 
+;; Lighter
 (defconst yabai/mode-line-lighter " yabai"
   "The default lighter for yabai-mode.")
 
-;;;; Variables
+;;;; Build system and integration definitions.
 (defvar yabai/build-system-definitions nil)
 (defvar yabai/integration-definitions nil)
 

@@ -81,7 +81,7 @@ If nil, BUILD-TREE-GETTER is path to source-tree.
 PRE-PROCESS is function takes arguments
  `build-config' `source-tree' `finish-func'.
 DATABASE-PATH-GETTER is function takes arguments
- `build-config' `build-tree' `source-file'.
+ `build-config' `build-tree'.
 COMPILATION is function takes arguments
  `build-config' `finish-func'.
 BUILD-TREE-GETTER is function takes no arguments.
@@ -122,6 +122,14 @@ BUILD-TREE-GETTER is function takes no arguments.
 (defun yabai/build-system-get-build-tree-getter-func (target)
   "Get TARGET's build tree getter function from BUILD-SYSTEMS."
   (cdr (assoc 'build-tree-getter (cdr (assoc target yabai/build-system-definitions)))))
+
+(defun yabai/build-system-get-database-path-current-buffer ()
+  "Get compilation database path used from current buffer."
+  (let ((database-path-getter (yabai/build-system-get-database-path-getter-func yabai/build-system-in-local-buffer))
+	(build-tree-getter (yabai/build-system-get-build-tree-getter-func yabai/build-system-in-local-buffer)))
+    (funcall database-path-getter
+	     yabai/path-build-config-file
+	     (funcall build-tree-getter))))
 
 (defun yabai/get-possible-config-file-name-list ()
   "Return a list of possible build config file names."
