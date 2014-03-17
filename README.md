@@ -1,3 +1,9 @@
+
+Notice!!!!!!!!!!!!!!!!
+======================
+
+___I want to contribute to awesome [irony-mode][]! So this package no longer supported!!___
+
 YABAI - Yet Another Build-system Attentive Integration Mode
 ========================
 
